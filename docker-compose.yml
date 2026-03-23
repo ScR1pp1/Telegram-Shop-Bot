@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  django:
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    volumes:
+      - ./django:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/categories/')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    command: >
+      sh -c "./entrypoint.sh"
+
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    volumes:
+      - ./bot:/app
+      - bot_logs:/app/logs
+    command: >
+      sh -c "python -m app.main"
+
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+    depends_on:
+      - django
+    ports:
+      - "3000:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+
+volumes:
+  pgdata:
+  static_volume:
+  media_volume:
+  bot_logs:
