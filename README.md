@@ -1,6 +1,4 @@
-```markdown
-# Telegram Shop Bot
-
+## Telegram Shop Bot
 Интернет-магазин, работающий в Telegram как полноценное приложение (Mini App). Проект состоит из трёх независимых сервисов, объединённых общей базой данных PostgreSQL.
 
 - **Telegram‑бот (Aiogram 3)** – обеспечивает взаимодействие с пользователями: регистрация, каталог, корзина, оформление заказа, уведомления, администрирование через чат.
@@ -8,8 +6,6 @@
 - **React (TypeScript) WebApp** – встраиваемое приложение, работающее внутри Telegram. Предоставляет современный интерфейс для каталога, корзины, избранного и оформления заказа.
 
 Все сервисы запускаются независимо с помощью Docker Compose.
-
----
 
 ## Архитектура
 
@@ -19,16 +15,6 @@
 - **WebApp (React)** – общается с Django API через REST. Авторизация осуществляется по `initData` (проверка подписи). Корзина синхронизируется с ботом через общую БД.
 - **Обмен событиями** – при изменении каналов или настроек Django отправляет `NOTIFY channel_changed`, бот инвалидирует кэш.
 
-```mermaid
-graph TD
-    A[Telegram Bot] -->|SQLAlchemy async| B[(PostgreSQL)]
-    C[Django Admin + API] -->|ORM| B
-    D[React WebApp] -->|REST API| C
-    A -->|LISTEN/NOTIFY| B
-    C -->|NOTIFY| B
-```
-
----
 
 ## Технологии
 
@@ -40,8 +26,6 @@ graph TD
 | База данных  | PostgreSQL 15                          |
 | Деплой       | Docker, Docker Compose                  |
 
----
-
 ## Запуск проекта
 
 ### Требования
@@ -51,15 +35,13 @@ graph TD
 
 ### 1. Клонировать репозиторий
 ```bash
-git clone https://github.com/your-repo/telegram-shop-bot.git
-cd telegram-shop-bot
+git clone https://github.com/ScR1pp1/Telegram-Shop-Bot
+cd "Telegram Shop Bot"
 ```
 
 ### 2. Настроить переменные окружения
-Скопировать `.env.example` в `.env` и заполнить обязательные поля:
 ```bash
-cp .env.example .env
-# редактировать .env
+редактировать .env
 ```
 
 Минимальный набор переменных:
@@ -74,17 +56,17 @@ DB_PORT=5432
 # Django
 DJANGO_SECRET_KEY=your-secret-key
 DJANGO_DEBUG=True
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,ваш-домен.loca.lt
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,ваш-домен.
 
 # Telegram
 BOT_TOKEN=ваш_токен_бота
 
 # WebApp и API (для локального тестирования используйте туннель, например ngrok/loca.lt)
-WEBAPP_URL=https://ваш-домен.loca.lt
-DJANGO_BASE_URL=https://ваш-домен.loca.lt
+WEBAPP_URL=https://ваш-домен.
+DJANGO_BASE_URL=https://ваш-домен.
 
 # CORS
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://ваш-домен.loca.lt
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://ваш-домен.
 ```
 
 ### 3. Запустить контейнеры
@@ -214,11 +196,3 @@ docker-compose exec django python manage.py createsuperuser
 - Оформление заказа (форма, отправка данных на API, кнопка «Оформить» через MainButton).
 - Поддержка BackButton и темы Telegram.
 - Адаптивный дизайн, поддержка светлой и тёмной темы.
-
----
-
-## Автор
-Ваше имя / Telegram: @username
-
-Проект выполнен в рамках тестового задания. Все требования технического задания реализованы.
-```
